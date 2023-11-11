@@ -28,6 +28,7 @@ async function query(data) {
 const ComicGenerator = () => {
   const [panels, setPanels] = useState(Array(10).fill(""));
   const [comicImage, setComicImage] = useState(Array(10).fill(null));
+  const [loading, setLoading] = useState(false);
 //   const [start, setStart] = useState(0);
   const [isUpdated, setIsUpdated] = useState(false);
 
@@ -47,6 +48,7 @@ const ComicGenerator = () => {
     // const data = { panels };
     const data = [...panels];
     const new_data = [...comicImage];
+    setLoading(true);
     try {
       for (let i = 0; i < 10; i++) {
         if (data[i] === "") {
@@ -54,16 +56,19 @@ const ComicGenerator = () => {
           continue;
         }
         const imageBlob = await query({ inputs: data[i] });
-        console.log(imageBlob, "imageBlob");
+    
+        
         new_data[i] = imageBlob;
-        setComicImage(new_data);
+        
       }
+      setComicImage(new_data);
+      setLoading(false);
     } catch (error) {
+      setLoading(false);
       console.error("Error generating comic:", error);
     }
   };
-  console.log(comicImage, "comicImage");
-  console.log(panels, "panels");
+
 
   const handleUpdate = () => {
     setIsUpdated(!isUpdated);
@@ -73,8 +78,9 @@ const ComicGenerator = () => {
     <div>
       <h1>Comic Generator</h1>
       <form>
+      <div className="parentPanel">
         {panels.map((text, index) => (
-          <div key={index}>
+          <div key={index} >
             <label>Panel {index + 1}:</label>
             <input
               id={index}
@@ -84,6 +90,7 @@ const ComicGenerator = () => {
             />
           </div>
         ))}
+        </div>
       </form>
       <button
         onClick={() => {
@@ -93,12 +100,18 @@ const ComicGenerator = () => {
       >
         Generate Comic
       </button>
-      {comicImage.map((image, index) => (
-        // console.log(image,'image')
-        <div className="image_container" key={index}>
-          {image && <img className="img" src={image} alt="" />}
+      {
+        loading?<div>Loading...</div>:<div className="parent_image_container">
+      
+        {comicImage.map((image, index) => (
+          // console.log(image,'image')
+          <div className='image_container' key={index}>
+            {image && <img className="img" src={image} alt="" />}
+          </div>
+        ))}
         </div>
-      ))}
+      }
+      
     </div>
   );
 };
